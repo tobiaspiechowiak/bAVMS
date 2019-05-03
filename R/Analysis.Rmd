@@ -5,6 +5,7 @@ output: html_notebook
 
 First loading all packages and data...
 
+
 ```{r}
 library('openxlsx')
 library('dplyr')
@@ -31,6 +32,8 @@ write.csv(clean.data, file = paste0(data.path,'Clean_data.csv'))
 
 ```{r, echo=TRUE}
 library('caret')
+library('corrplot')
+
 new.data <- read.csv(paste0(data.path,'Cleaned_data_from_Python.csv'))
 
 data.cor <- cor(new.data,use = 'complete.obs')
@@ -53,7 +56,6 @@ dev.off()
 
 ```{r}
 fit <- lm(`Volume.of.Hemorrhage..ml.` ~ ., data = filtered.data)
-
 summary(fit)
 ```
 
@@ -62,6 +64,30 @@ fit.one <- lm(`Volume.of.Hemorrhage..ml.` ~ `Report..Smaller...0.no..1.yes`, dat
 summary(fit.one)
 
 ```
+
+```{r}
+
+library('ggplot2')
+library('partykit')
+
+
+ggplot(data = clean.data, aes(y = `Volume.of.Hemorrhage.(ml)`, x = `2nd.DSA.Venous.drainage;.0=superficial;.1=deep`)) + 
+         geom_point() + 
+          geom_smooth(method = lm)
+
+clean.data.num <- sapply(clean.data,FUN = as.numeric)
+
+clean.data.v2 <- as.data.frame(clean.data.num)
+
+
+library('rpart')
+
+fit.tree <- rpart(data = clean.data.v2, `Volume.of.Hemorrhage.(ml)` ~ .,  method = 'anova', control = rpart.control(cp = 0.003))
+
+plot(as.party(fit.tree))
+
+```
+
 
 
 
