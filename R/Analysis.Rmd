@@ -1,4 +1,4 @@
----
+ ---
 title: "Eike Analysis"
 output: html_notebook
 ---
@@ -87,7 +87,21 @@ fit.tree <- rpart(data = clean.data.v2, `Volume.of.Hemorrhage.(ml)` ~ .,  method
 plot(as.party(fit.tree))
 
 ```
+ Jetzt ne Anova fuer die Parameter: 
 
+
+```{r}
+
+library('reshape2')
+
+
+bla3 <- clean.data.v2[,c(10:16,21:24,27:29)]
+
+bla4 <- melt(bla3)
+
+
+
+```
 
 
 
