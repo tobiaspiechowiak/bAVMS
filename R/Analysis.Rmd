@@ -33,6 +33,7 @@ write.csv(clean.data, file = paste0(data.path,'Clean_data.csv'))
 ```{r, echo=TRUE}
 library('caret')
 library('corrplot')
+library('Hmisc')
 
 new.data <- read.csv(paste0(data.path,'Cleaned_data_from_Python.csv'))
 
@@ -49,6 +50,22 @@ data.cor <- cor(filtered.data,use = 'complete.obs')
 png('CorPlot_clean.png', width = 2000, height = 2000)
 corrplot(data.cor,method = 'circle')
 dev.off()
+
+#now with probabilities
+res <- rcorr(as.matrix(new.data))
+
+
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+    )
+}
+
+cortable <- flattenCorrMatrix(res$r,res$P)
 
 
 ```
@@ -93,16 +110,64 @@ plot(as.party(fit.tree))
 ```{r}
 
 library('reshape2')
+library('ggplot2')
 
 
 bla3 <- clean.data.v2[,c(10:16,21:24,27:29)]
 
 bla4 <- melt(bla3)
 
+tmp.1 <- c(rep('Nidus width',59),
+           rep('Nidus height',59),
+           rep('Nidus depth',59),
+           rep('Nidus volume',59),
+           rep('Venuous drainage',59),
+           rep('Eloquence',59),
+           rep('Martin Spetzler',59))
+
+tmp.2 <- rep(tmp.1,2)
+
+bla4$condition <- tmp.2
+
+tmp.3 <- c(rep('1st',length(tmp.1)),
+           rep('2nd',length(tmp.1)))
+
+bla4$time <- tmp.3
+
+
+names(bla4)[3:4] <- c('Condition','Time')
+
+
+ggplot(data = bla4, aes(x= Condition, y = value, fill = Time)) + 
+         geom_boxplot() + scale_y_continuous(limits = c(0,100))
+
+
+#plot differences 
+
+bla5 <- melt(bla3[,1:7] - bla3[,8:14])
+
+
+bla5$Condition <- tmp.1
+
+
+ggplot(data = bla5, aes(x= Condition, y = value)) + 
+         geom_boxplot(fill='cornflowerblue') + scale_y_continuous(limits = c(-10,10))  +
+         labs(title = 'Difference 1st and 2nd visit')
+
+sol.t <- list()
+
+
+for (idx in 1:7){
+
+sol.t[[idx]] <- t.test(bla3[,idx],bla3[,idx + 8 - 1],paired = TRUE)
+
+
+print(sol.t[[idx]])
+
+}
 
 
 ```
-
 
 
 
