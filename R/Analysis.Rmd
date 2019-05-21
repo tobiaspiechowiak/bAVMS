@@ -67,6 +67,12 @@ flattenCorrMatrix <- function(cormat, pmat) {
 
 cortable <- flattenCorrMatrix(res$r,res$P)
 
+corrtable <- data.frame(cortable$row[948:990],round(cortable$cor[948:990],2),round(cortable$p[948:990],3))
+
+names(corrtable) <- c('Parameter','Correlation','p value')
+
+
+write.xlsx(corrtable, "Corrtable_VolumeOfHemorrhage.xlsx")
 
 ```
 
