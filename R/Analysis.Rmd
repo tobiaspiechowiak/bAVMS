@@ -30,51 +30,6 @@ write.csv(clean.data, file = paste0(data.path,'Clean_data.csv'))
 
 
 
-```{r, echo=TRUE}
-library('caret')
-library('corrplot')
-library('Hmisc')
-
-new.data <- read.csv(paste0(data.path,'Cleaned_data_from_Python.csv'))
-
-data.cor <- cor(new.data,use = 'complete.obs')
-png('CorPlot.png', width = 2000, height = 2000)
-corrplot(data.cor,method = 'circle')
-dev.off()
-
-tmp <- findCorrelation(data.cor,cutoff = 0.8)
-
-filtered.data <- new.data[,-c(tmp)]
-
-data.cor <- cor(filtered.data,use = 'complete.obs')
-png('CorPlot_clean.png', width = 2000, height = 2000)
-corrplot(data.cor,method = 'circle')
-dev.off()
-
-#now with probabilities
-res <- rcorr(as.matrix(new.data))
-
-
-flattenCorrMatrix <- function(cormat, pmat) {
-  ut <- upper.tri(cormat)
-  data.frame(
-    row = rownames(cormat)[row(cormat)[ut]],
-    column = rownames(cormat)[col(cormat)[ut]],
-    cor  =(cormat)[ut],
-    p = pmat[ut]
-    )
-}
-
-cortable <- flattenCorrMatrix(res$r,res$P)
-
-corrtable <- data.frame(cortable$row[948:990],round(cortable$cor[948:990],2),round(cortable$p[948:990],3))
-
-names(corrtable) <- c('Parameter','Correlation','p value')
-
-
-write.xlsx(corrtable, "Corrtable_VolumeOfHemorrhage.xlsx")
-
-```
 
 
 ```{r}
@@ -175,6 +130,60 @@ print(sol.t[[idx]])
 
 ```
 
+```{r, echo=TRUE}
+library('caret')
+library('corrplot')
+library('Hmisc')
+
+new.data <- clean.data.v2
+
+data.cor <- cor(new.data,use = 'complete.obs')
+png('CorPlot.png', width = 2000, height = 2000)
+corrplot(data.cor,method = 'circle')
+dev.off()
+
+#tmp <- findCorrelation(data.cor,cutoff = 0.8)
+
+#filtered.data <- new.data[,-c(tmp)]
+
+data.cor <- cor(filtered.data,use = 'complete.obs')
+png('CorPlot_clean.png', width = 2000, height = 2000)
+corrplot(data.cor,method = 'circle')
+dev.off()
+
+#now with probabilities
+res <- rcorr(as.matrix(new.data))
 
 
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+    )
+}
+
+cortable <- flattenCorrMatrix(res$r,res$P)
+
+corrtable <- data.frame(cortable$row[948:990],round(cortable$cor[948:990],2),round(cortable$p[948:990],3))
+
+names(corrtable) <- c('Parameter','Correlation','p value')
+
+
+write.xlsx(corrtable, "Corrtable_VolumeOfHemorrhage.xlsx")
+
+```
+
+```{r}
+library('car')
+
+#only keep Volumen of Hemorrhage, Venuous Stenosis and Report Smaller Yes/No
+
+scatterplotMatrix(~ `Volume.of.Hemorrhage.(ml)` + `venous.stenosis.(70%);.0=No;.1=yes` + `Report:.Smaller?;.0=no;.1=yes`, data = new.data)
+      
+
+
+```
 
